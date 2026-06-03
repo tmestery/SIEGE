@@ -1,6 +1,6 @@
 # attacks.md
 
-A reference list of the core attack categories SIEGE targets.
+A reference list of the core attack categories SEIGE targets.
 
 ## 1. Prompt Injection
 
@@ -66,7 +66,7 @@ A reference list of the core attack categories SIEGE targets.
 - *Context poisoning* — establishing false premises early that are later exploited
 - *Trust building* — gaining model "agreement" on small things before a large ask
 
-**Why it matters:** Single-turn defenses are blind to this. Most deployed systems are multi-turn. Directly extends GAUNTLET's CodeClip multi-turn benchmark lineage.
+**Why it matters:** Single-turn defenses are blind to this. Most deployed systems are multi-turn. Directly extends SEIGE's CodeClip multi-turn benchmark lineage.
 
 ---
 

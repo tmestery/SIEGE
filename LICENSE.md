@@ -9,15 +9,15 @@ purposes, subject to the following conditions:
    publications, presentations, or derivative tools, must include clear
    attribution to the original author:
 
-       GAUNTLET — Tyler Mestery (https://github.com/tmestery)
+       SEIGE — Tyler Mestery (https://github.com/tmestery)
 
 2. CITATION REQUIRED FOR PUBLICATIONS. Any academic paper, report, blog post,
    or other publication that uses or references results produced by the Software
    must cite it as follows:
 
-       Mestery, T. (2026). GAUNTLET: Generative AI Universal Threat &
-       Liability Evaluation Toolkit. GitHub.
-       https://github.com/tmestery/gauntlet
+       Mestery, T. (2026). SEIGE: Security Evaluation and Integrity of
+       Generative Engines. GitHub.
+       https://github.com/tmestery/seige
 
 3. MODIFICATIONS. You may modify the Software for personal or research use.
    Modified versions may not be publicly distributed or published without

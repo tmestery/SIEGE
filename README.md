@@ -1,5 +1,5 @@
-# SIEGE
-**Security and Integrity Evaluation of Generative Engines**
+# SEIGE
+**Security Evaluation and Integrity of Generative Engines**
 
 A framework for evaluating LLM security - run structured adversarial attacks against any model and get reproducible, scored reports.
 
@@ -18,10 +18,10 @@ See [`attacks.md`](attacks.md) for details.
 ---
 
 ## Citation
-If you use SIEGE in your research, please cite:
+If you use SEIGE in your research, please cite:
 ```
-Mestery, T. (2026). SIEGE: Security and Integrity Evaluation of Generative Engines. GitHub.
-https://github.com/tmestery/siege
+Mestery, T. (2026). SEIGE: Security Evaluation and Integrity of Generative Engines. GitHub.
+https://github.com/tmestery/seige
 ```
 
 ---
