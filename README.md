@@ -158,6 +158,36 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m siege.ci_eval \
   --output-dir artifacts/nightly-eval
 ```
 
+## Dataset Export
+
+Convert SEIGE report JSON into dataset-ready rows for HuggingFace Datasets or
+other downstream analysis. Each row includes `run_id`, `model`, `attack`,
+`prompt`, `response`, `passed`, `risk_score`, and `metadata`, plus score fields
+such as `severity`, `weighted_risk_score`, and `category`.
+
+Export one report file or an entire directory of reports:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m siege.dataset_export \
+  --input artifacts/ollama-local-eval/gemma3_4b_it_qat \
+  --output artifacts/datasets/gemma3_4b_it_qat.jsonl \
+  --format jsonl \
+  --run-id ollama-gemma3-2026-06-02
+```
+
+Parquet export is available when `pyarrow` is installed:
+
+```sh
+pip install pyarrow
+PYTHONDONTWRITEBYTECODE=1 python3 -m siege.dataset_export \
+  --input artifacts/ollama-local-eval/gemma3_4b_it_qat \
+  --output artifacts/datasets/gemma3_4b_it_qat.parquet \
+  --format parquet
+```
+
+Keep raw `artifacts/` runs local and publish curated dataset exports to
+HuggingFace Datasets instead of committing generated evaluation data to GitHub.
+
 ## Citation
 
 If you use SEIGE in your research, please cite:
