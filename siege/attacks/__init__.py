@@ -1,6 +1,11 @@
 """Attack module interfaces and examples."""
 
 from siege.attacks.base import Attack, AttackResult
+from siege.attacks.jailbreaking import (
+    DEFAULT_JAILBREAK_CASES,
+    JailbreakCase,
+    JailbreakingAttack,
+)
 from siege.attacks.prompt_injection import (
     DEFAULT_PROMPT_INJECTION_CASES,
     PromptInjectionAttack,
@@ -11,7 +16,10 @@ from siege.attacks.stub import StubAttack
 __all__ = [
     "Attack",
     "AttackResult",
+    "DEFAULT_JAILBREAK_CASES",
     "DEFAULT_PROMPT_INJECTION_CASES",
+    "JailbreakCase",
+    "JailbreakingAttack",
     "PromptInjectionAttack",
     "PromptInjectionCase",
     "StubAttack",
