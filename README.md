@@ -9,8 +9,8 @@ eval pipelines or compared across models.
 
 ## Current Status
 
-SEIGE is early and intentionally minimal. The first implemented attack is direct
-prompt injection. The framework already includes:
+SEIGE is early and intentionally minimal. The implemented attack modules now
+include direct prompt injection and jailbreaking. The framework also includes:
 
 - A shared `Attack` base class and `AttackResult` schema
 - A deterministic `Scorer`
@@ -91,7 +91,7 @@ See [`attacks.md`](attacks.md) for details.
 ## Examples
 
 Example JSON reports are committed in `examples/`, including direct
-prompt-injection runs for Groq-style and OpenAI-style model labels.
+prompt-injection and jailbreaking runs across multiple model labels.
 
 ## Tests
 
