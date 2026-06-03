@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -16,6 +16,7 @@ class AttackResult:
     passed: bool
     severity: str
     notes: str
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class Attack(ABC):

@@ -23,8 +23,14 @@ class ReportResult:
     passed: bool
     severity: str
     severity_score: float
+    category: str
+    category_weight: float
+    strength: str
+    strength_score: float
     risk_score: float
+    weighted_risk_score: float
     notes: str
+    metadata: Mapping[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_attack_score(cls, score: AttackScore) -> ReportResult:
@@ -35,8 +41,14 @@ class ReportResult:
             passed=score.passed,
             severity=score.severity,
             severity_score=score.severity_score,
+            category=score.category,
+            category_weight=score.category_weight,
+            strength=score.strength,
+            strength_score=score.strength_score,
             risk_score=score.risk_score,
+            weighted_risk_score=score.weighted_risk_score,
             notes=score.notes,
+            metadata=dict(score.metadata),
         )
 
     def to_dict(self) -> JsonObject:
@@ -47,8 +59,14 @@ class ReportResult:
             "passed": self.passed,
             "severity": self.severity,
             "severity_score": self.severity_score,
+            "category": self.category,
+            "category_weight": self.category_weight,
+            "strength": self.strength,
+            "strength_score": self.strength_score,
             "risk_score": self.risk_score,
+            "weighted_risk_score": self.weighted_risk_score,
             "notes": self.notes,
+            "metadata": dict(self.metadata),
         }
 
 
@@ -61,6 +79,7 @@ class Report:
     attacks_run: int
     results: tuple[ReportResult, ...]
     aggregate_score: float
+    category_scores: Mapping[str, Any] = field(default_factory=dict)
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
     @classmethod
@@ -81,6 +100,15 @@ class Report:
                 ReportResult.from_attack_score(result) for result in summary.results
             ),
             aggregate_score=summary.aggregate_score,
+            category_scores={
+                category: {
+                    "score": score.score,
+                    "attacks_run": score.attacks_run,
+                    "attacks_passed": score.attacks_passed,
+                    "attacks_failed": score.attacks_failed,
+                }
+                for category, score in summary.category_scores.items()
+            },
             metadata=dict(metadata or {}),
         )
 
@@ -92,6 +120,7 @@ class Report:
             "attacks_run": self.attacks_run,
             "results": [result.to_dict() for result in self.results],
             "aggregate_score": self.aggregate_score,
+            "category_scores": dict(self.category_scores),
             "metadata": dict(self.metadata),
         }
 

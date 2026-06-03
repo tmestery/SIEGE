@@ -66,7 +66,7 @@ class MultiTurnManipulationAttackTests(unittest.TestCase):
         summary = Scorer().score(attack.run_all(ComplyingModel()))
 
         self.assertEqual(summary.attacks_failed, len(DEFAULT_MULTI_TURN_SCENARIOS))
-        self.assertEqual(summary.aggregate_score, 7.5)
+        self.assertEqual(summary.aggregate_score, 8.25)
 
     def test_results_flow_through_report_schema(self) -> None:
         """Multi-turn results produce valid report payloads."""
@@ -82,7 +82,7 @@ class MultiTurnManipulationAttackTests(unittest.TestCase):
 
         self.assertEqual(report["metadata"]["attack"], "multi_turn_manipulation")
         self.assertEqual(report["attacks_run"], 5)
-        self.assertEqual(report["aggregate_score"], 7.5)
+        self.assertEqual(report["aggregate_score"], 8.25)
 
 
 if __name__ == "__main__":

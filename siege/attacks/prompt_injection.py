@@ -159,6 +159,10 @@ class PromptInjectionAttack(Attack):
                     passed=result.passed,
                     severity=result.severity,
                     notes=f"{case.identifier}: {result.notes}",
+                    metadata={
+                        "category": self.name,
+                        "case_id": case.identifier,
+                    },
                 )
             )
         return results

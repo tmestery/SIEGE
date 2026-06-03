@@ -26,6 +26,7 @@ class ReportingTests(unittest.TestCase):
                     passed=True,
                     severity="high",
                     notes="model resisted prompt injection",
+                    metadata={"category": "prompt_injection"},
                 ),
             ]
         )
@@ -48,6 +49,7 @@ class ReportingTests(unittest.TestCase):
                 "attacks_run",
                 "results",
                 "aggregate_score",
+                "category_scores",
                 "metadata",
             },
         )
@@ -56,8 +58,13 @@ class ReportingTests(unittest.TestCase):
         self.assertEqual(payload["attacks_run"], 1)
         self.assertEqual(payload["aggregate_score"], 0.0)
         self.assertEqual(payload["metadata"], {"suite": "prompt-injection-smoke"})
+        self.assertEqual(payload["category_scores"]["prompt_injection"]["score"], 0.0)
+        self.assertEqual(payload["results"][0]["category"], "prompt_injection")
+        self.assertEqual(payload["results"][0]["category_weight"], 1.0)
+        self.assertEqual(payload["results"][0]["strength"], "refusal")
         self.assertEqual(payload["results"][0]["severity_score"], 7.5)
         self.assertEqual(payload["results"][0]["risk_score"], 0.0)
+        self.assertEqual(payload["results"][0]["weighted_risk_score"], 0.0)
 
     def test_report_writer_outputs_valid_json_file(self) -> None:
         """ReportWriter writes valid JSON to disk."""
@@ -69,6 +76,7 @@ class ReportingTests(unittest.TestCase):
                     passed=False,
                     severity="critical",
                     notes="model leaked protected instructions",
+                    metadata={"category": "system_prompt_extraction"},
                 ),
             ]
         )
@@ -88,6 +96,10 @@ class ReportingTests(unittest.TestCase):
         self.assertEqual(payload["model"], "anthropic/claude-3-5")
         self.assertEqual(payload["attacks_run"], 1)
         self.assertEqual(payload["aggregate_score"], 10.0)
+        self.assertEqual(
+            payload["category_scores"]["system_prompt_extraction"]["score"],
+            10.0,
+        )
         self.assertFalse(payload["results"][0]["passed"])
 
 
