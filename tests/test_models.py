@@ -3,16 +3,19 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import types
 import unittest
-from unittest.mock import patch
+import urllib.error
+from unittest.mock import MagicMock, patch
 
 from siege.cli import build_parser
 from siege.models import (
     AnthropicClient,
     GroqClient,
+    HuggingFaceClient,
     ModelConfigurationError,
     OllamaClient,
     OpenAIClient,
@@ -32,6 +35,10 @@ class ModelSpecTests(unittest.TestCase):
             "openai/gpt-4o": ("openai", "gpt-4o"),
             "anthropic/claude-3-5": ("anthropic", "claude-3-5"),
             "ollama/mistral": ("ollama", "mistral"),
+            "huggingface/meta-llama/Llama-3.1-8B-Instruct": (
+                "huggingface",
+                "meta-llama/Llama-3.1-8B-Instruct",
+            ),
         }
 
         for value, expected in examples.items():
@@ -57,19 +64,25 @@ class ModelSpecTests(unittest.TestCase):
             "GROQ_API_KEY": "groq-key",
             "OPENAI_API_KEY": "openai-key",
             "ANTHROPIC_API_KEY": "anthropic-key",
+            "HUGGINGFACE_API_KEY": "huggingface-key",
         }
 
         with patch.dict(os.environ, env, clear=False):
             groq = create_model_client("groq/llama3")
             openai = create_model_client("openai/gpt-4o")
             anthropic = create_model_client("anthropic/claude-3-5")
+            huggingface = create_model_client(
+                "huggingface/meta-llama/Llama-3.1-8B-Instruct"
+            )
 
         self.assertIsInstance(groq, GroqClient)
         self.assertIsInstance(openai, OpenAIClient)
         self.assertIsInstance(anthropic, AnthropicClient)
+        self.assertIsInstance(huggingface, HuggingFaceClient)
         self.assertEqual(groq.api_key, "groq-key")
         self.assertEqual(openai.api_key, "openai-key")
         self.assertEqual(anthropic.api_key, "anthropic-key")
+        self.assertEqual(huggingface.api_key, "huggingface-key")
 
     def test_missing_hosted_api_key_raises_configuration_error(self) -> None:
         """Hosted providers require an API key."""
@@ -111,6 +124,44 @@ class ModelSpecTests(unittest.TestCase):
 
         self.assertEqual(client.base_url, "http://ollama.example:11434")
 
+    def test_huggingface_client_uses_common_complete_contract(self) -> None:
+        """HuggingFaceClient exposes complete(prompt, system_prompt) -> str."""
+        response = MagicMock()
+        response.read.return_value = json.dumps(
+            [{"generated_text": "model response"}]
+        ).encode("utf-8")
+        response.__enter__.return_value = response
+
+        with patch.dict(os.environ, {"HUGGINGFACE_API_KEY": "hf-key"}, clear=True):
+            client = create_model_client("huggingface/test-model")
+            with patch("urllib.request.urlopen", return_value=response) as urlopen:
+                completion = client.complete("hello", system_prompt="system")
+
+        request = urlopen.call_args.args[0]
+        payload = json.loads(request.data.decode("utf-8"))
+        self.assertEqual(completion, "model response")
+        self.assertEqual(payload["inputs"], "system\n\nhello")
+        self.assertEqual(request.headers["Authorization"], "Bearer hf-key")
+
+    def test_huggingface_connection_errors_are_clear(self) -> None:
+        """HuggingFace network failures produce a clear connection error."""
+        with patch.dict(os.environ, {"HUGGINGFACE_API_KEY": "hf-key"}, clear=True):
+            client = create_model_client("huggingface/test-model")
+            with patch(
+                "urllib.request.urlopen",
+                side_effect=urllib.error.URLError("offline"),
+            ):
+                with self.assertRaises(ConnectionError):
+                    client.complete("hello")
+
+    def test_openai_missing_dependency_error_is_clear(self) -> None:
+        """Hosted SDK clients raise clear missing dependency errors."""
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "openai-key"}, clear=True):
+            client = create_model_client("openai/gpt-4o")
+            with patch.dict(sys.modules, {"openai": None}):
+                with self.assertRaisesRegex(ImportError, "openai"):
+                    client.complete("hello")
+
     def test_cli_model_flag_accepts_provider_model_examples(self) -> None:
         """The CLI accepts provider/model values through --model."""
         parser = build_parser()
@@ -120,6 +171,7 @@ class ModelSpecTests(unittest.TestCase):
             "openai/gpt-4o",
             "anthropic/claude-3-5",
             "ollama/mistral",
+            "huggingface/meta-llama/Llama-3.1-8B-Instruct",
         ):
             with self.subTest(value=value):
                 args = parser.parse_args(["--model", value])

@@ -3,6 +3,7 @@
 from siege.models import (
     AnthropicClient,
     GroqClient,
+    HuggingFaceClient,
     ModelClient,
     ModelConfigurationError,
     ModelSpec,
@@ -19,6 +20,7 @@ __all__ = [
     "AnthropicClient",
     "AttackScore",
     "GroqClient",
+    "HuggingFaceClient",
     "ModelClient",
     "ModelConfigurationError",
     "ModelSpec",
