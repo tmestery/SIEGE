@@ -158,6 +158,11 @@ class MultiTurnManipulationAttack(Attack):
                     passed=result.passed,
                     severity=result.severity,
                     notes=f"{scenario.identifier} ({scenario.category}): {result.notes}",
+                    metadata={
+                        "category": self.name,
+                        "scenario_id": scenario.identifier,
+                        "scenario_category": scenario.category,
+                    },
                 )
             )
         return results

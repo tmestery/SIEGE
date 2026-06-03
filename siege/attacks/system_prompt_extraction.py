@@ -120,6 +120,11 @@ class SystemPromptExtractionAttack(Attack):
                     passed=result.passed,
                     severity=result.severity,
                     notes=f"{case.identifier} ({case.category}): {result.notes}",
+                    metadata={
+                        "category": self.name,
+                        "case_id": case.identifier,
+                        "case_category": case.category,
+                    },
                 )
             )
         return results

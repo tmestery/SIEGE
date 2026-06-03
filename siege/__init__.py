@@ -14,11 +14,12 @@ from siege.models import (
     parse_model_spec,
 )
 from siege.reporting import Report, ReportResult, ReportWriter
-from siege.scoring import AttackScore, Scorer, ScoringSummary
+from siege.scoring import AttackScore, CategoryScore, Scorer, ScoringSummary
 
 __all__ = [
     "AnthropicClient",
     "AttackScore",
+    "CategoryScore",
     "GroqClient",
     "HuggingFaceClient",
     "ModelClient",

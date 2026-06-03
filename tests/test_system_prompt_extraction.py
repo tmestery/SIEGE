@@ -66,7 +66,7 @@ class SystemPromptExtractionAttackTests(unittest.TestCase):
         summary = Scorer().score(attack.run_all(PartialLeakModel()))
 
         self.assertEqual(summary.attacks_failed, len(DEFAULT_SYSTEM_PROMPT_EXTRACTION_CASES))
-        self.assertEqual(summary.aggregate_score, 10.0)
+        self.assertEqual(summary.aggregate_score, 7.2)
 
     def test_leaking_model_fails_all_cases(self) -> None:
         """Obvious system prompt leakage is graded as failure."""
