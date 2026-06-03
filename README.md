@@ -122,6 +122,42 @@ model risk.
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests
 ```
 
+## CI And Nightly Eval
+
+GitHub Actions runs the unit test suite on pull requests and pushes to `main`.
+A scheduled nightly workflow also runs a fixed SEIGE evaluation suite and uploads
+JSON reports as workflow artifacts.
+
+By default, nightly eval uses deterministic local-safe models:
+
+```sh
+SEIGE_CI_MODELS=local/refusing,local/leaking
+```
+
+To run against live providers, set the repository variable `SEIGE_CI_MODELS` to a
+comma-separated list such as:
+
+```text
+ollama/mistral,openai/gpt-4o-mini,anthropic/claude-3-5,huggingface/meta-llama/Llama-3.1-8B-Instruct
+```
+
+Then configure the matching repository secrets or variables:
+
+- `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY`
+- `GROQ_API_KEY`
+- `HUGGINGFACE_API_KEY`
+- `HUGGINGFACE_BASE_URL` as a repository variable if you need a custom endpoint
+- `OLLAMA_BASE_URL` as a repository variable if a reachable Ollama service is available
+
+You can run the same fixed suite locally:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m siege.ci_eval \
+  --models "local/refusing,local/leaking" \
+  --output-dir artifacts/nightly-eval
+```
+
 ## Citation
 
 If you use SEIGE in your research, please cite:
