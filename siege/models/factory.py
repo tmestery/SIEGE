@@ -6,6 +6,7 @@ from siege.models.base import ModelClient, parse_model_spec
 from siege.models.providers import (
     AnthropicClient,
     GroqClient,
+    HuggingFaceClient,
     OllamaClient,
     OpenAIClient,
 )
@@ -20,10 +21,12 @@ def create_model_client(model_spec: str) -> ModelClient:
         return OpenAIClient(spec.model)
     if spec.provider == "anthropic":
         return AnthropicClient(spec.model)
+    if spec.provider == "huggingface":
+        return HuggingFaceClient(spec.model)
     if spec.provider == "ollama":
         return OllamaClient(spec.model)
 
     raise ValueError(
         f"Unsupported model provider '{spec.provider}'. "
-        "Expected one of: anthropic, groq, ollama, openai."
+        "Expected one of: anthropic, groq, huggingface, ollama, openai."
     )

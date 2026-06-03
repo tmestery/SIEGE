@@ -11,6 +11,7 @@ from siege.models.factory import create_model_client
 from siege.models.providers import (
     AnthropicClient,
     GroqClient,
+    HuggingFaceClient,
     OllamaClient,
     OpenAIClient,
 )
@@ -18,6 +19,7 @@ from siege.models.providers import (
 __all__ = [
     "AnthropicClient",
     "GroqClient",
+    "HuggingFaceClient",
     "ModelClient",
     "ModelConfigurationError",
     "ModelSpec",

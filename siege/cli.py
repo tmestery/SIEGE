@@ -16,7 +16,8 @@ def build_parser() -> argparse.ArgumentParser:
         type=_model_spec,
         help=(
             "Model identifier in provider/model format, for example "
-            "groq/llama3, openai/gpt-4o, anthropic/claude-3-5, or ollama/mistral."
+            "groq/llama3, openai/gpt-4o, anthropic/claude-3-5, "
+            "ollama/mistral, or huggingface/meta-llama/Llama-3.1-8B-Instruct."
         ),
     )
     parser.add_argument(

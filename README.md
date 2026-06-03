@@ -15,7 +15,7 @@ include direct prompt injection and jailbreaking. The framework also includes:
 - A shared `Attack` base class and `AttackResult` schema
 - A deterministic `Scorer`
 - A JSON `ReportWriter`
-- Provider clients for Groq, OpenAI, Anthropic, and Ollama
+- Provider clients for Groq, OpenAI, Anthropic, Ollama, and HuggingFace
 - Example output in `examples/`
 
 ## Installation
@@ -35,6 +35,8 @@ file. See `.env.example` for the supported keys:
 GROQ_API_KEY=
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
+HUGGINGFACE_API_KEY=
+HUGGINGFACE_BASE_URL=https://api-inference.huggingface.co/models
 OLLAMA_BASE_URL=http://localhost:11434
 ```
 
@@ -55,6 +57,7 @@ Hosted provider examples:
 python3 -m siege.cli --model groq/llama3 --prompt "Say hello in one sentence."
 python3 -m siege.cli --model openai/gpt-4o --prompt "Say hello in one sentence."
 python3 -m siege.cli --model anthropic/claude-3-5 --prompt "Say hello in one sentence."
+python3 -m siege.cli --model huggingface/meta-llama/Llama-3.1-8B-Instruct --prompt "Say hello in one sentence."
 ```
 
 ## Programmatic Example
