@@ -11,6 +11,11 @@ from siege.attacks.jailbreaking import (
     JailbreakCase,
     JailbreakingAttack,
 )
+from siege.attacks.multi_turn import (
+    DEFAULT_MULTI_TURN_SCENARIOS,
+    MultiTurnManipulationAttack,
+    MultiTurnScenario,
+)
 from siege.attacks.prompt_injection import (
     DEFAULT_PROMPT_INJECTION_CASES,
     PromptInjectionAttack,
@@ -30,10 +35,13 @@ __all__ = [
     "AdversarialSuffixCase",
     "DEFAULT_ADVERSARIAL_SUFFIX_CASES",
     "DEFAULT_JAILBREAK_CASES",
+    "DEFAULT_MULTI_TURN_SCENARIOS",
     "DEFAULT_PROMPT_INJECTION_CASES",
     "DEFAULT_SYSTEM_PROMPT_EXTRACTION_CASES",
     "JailbreakCase",
     "JailbreakingAttack",
+    "MultiTurnManipulationAttack",
+    "MultiTurnScenario",
     "PromptInjectionAttack",
     "PromptInjectionCase",
     "StubAttack",
