@@ -17,6 +17,11 @@ from siege.attacks.prompt_injection import (
     PromptInjectionCase,
 )
 from siege.attacks.stub import StubAttack
+from siege.attacks.system_prompt_extraction import (
+    DEFAULT_SYSTEM_PROMPT_EXTRACTION_CASES,
+    SystemPromptExtractionAttack,
+    SystemPromptExtractionCase,
+)
 
 __all__ = [
     "Attack",
@@ -26,9 +31,12 @@ __all__ = [
     "DEFAULT_ADVERSARIAL_SUFFIX_CASES",
     "DEFAULT_JAILBREAK_CASES",
     "DEFAULT_PROMPT_INJECTION_CASES",
+    "DEFAULT_SYSTEM_PROMPT_EXTRACTION_CASES",
     "JailbreakCase",
     "JailbreakingAttack",
     "PromptInjectionAttack",
     "PromptInjectionCase",
     "StubAttack",
+    "SystemPromptExtractionAttack",
+    "SystemPromptExtractionCase",
 ]
