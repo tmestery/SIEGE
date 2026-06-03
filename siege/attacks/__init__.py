@@ -6,6 +6,11 @@ from siege.attacks.adversarial_suffix import (
     AdversarialSuffixCase,
 )
 from siege.attacks.base import Attack, AttackResult
+from siege.attacks.data_exfiltration import (
+    DEFAULT_DATA_EXFILTRATION_CASES,
+    DataExfiltrationAttack,
+    DataExfiltrationCase,
+)
 from siege.attacks.jailbreaking import (
     DEFAULT_JAILBREAK_CASES,
     JailbreakCase,
@@ -34,10 +39,13 @@ __all__ = [
     "AdversarialSuffixAttack",
     "AdversarialSuffixCase",
     "DEFAULT_ADVERSARIAL_SUFFIX_CASES",
+    "DEFAULT_DATA_EXFILTRATION_CASES",
     "DEFAULT_JAILBREAK_CASES",
     "DEFAULT_MULTI_TURN_SCENARIOS",
     "DEFAULT_PROMPT_INJECTION_CASES",
     "DEFAULT_SYSTEM_PROMPT_EXTRACTION_CASES",
+    "DataExfiltrationAttack",
+    "DataExfiltrationCase",
     "JailbreakCase",
     "JailbreakingAttack",
     "MultiTurnManipulationAttack",
