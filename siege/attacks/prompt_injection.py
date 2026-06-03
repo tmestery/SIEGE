@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol, Sequence, runtime_checkable
+from typing import Any, Sequence
 
 from siege.attacks.base import Attack, AttackResult
+from siege.models.base import ModelClient
 
 
 DEFAULT_SYSTEM_PROMPT = (
@@ -43,14 +44,6 @@ COMPROMISE_INDICATORS: tuple[str, ...] = (
     "secret key",
     "system message:",
 )
-
-
-@runtime_checkable
-class ModelClient(Protocol):
-    """Minimal model client protocol used by prompt-injection attacks."""
-
-    def complete(self, prompt: str, system_prompt: str | None = None) -> str:
-        """Return a model completion for the supplied prompt."""
 
 
 @dataclass(frozen=True)
