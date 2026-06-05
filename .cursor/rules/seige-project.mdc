@@ -1,0 +1,58 @@
+---
+description: Advanced project guidance for SEIGE development workflow and conventions
+alwaysApply: true
+---
+
+# SEIGE Project Guidance
+
+SEIGE is a Python framework for reproducible LLM security evaluation. Optimize for deterministic behavior, reviewable branches, clean reports, and practical research output.
+
+## Core Architecture
+
+- Attack modules live in `siege/attacks/`, extend `Attack`, and return deterministic `AttackResult` objects.
+- Attacks should be provider-agnostic. Provider logic belongs behind `ModelClient` implementations in `siege.models`.
+- Scoring logic belongs in `siege/scoring.py`; JSON report schema belongs in `siege/reporting.py`; dataset/report tooling should be separate modules.
+- `AttackResult.metadata` is the preferred extension point for category, case ID, scenario ID, strength, and future dataset fields.
+- Keep public schemas stable. If a report, score, or dataset field changes, update tests and README docs in the same branch.
+
+## Testing
+
+- Add or update `unittest` tests under `tests/` for behavior changes.
+- Use deterministic mock models for attack tests; do not require live API keys in unit tests.
+- Run the full suite before committing or merging:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests
+```
+
+## Implementation Style
+
+- Prefer standard-library solutions unless a dependency is clearly justified.
+- Preserve the deterministic scoring rubric unless the issue explicitly changes it.
+- Use clear errors for missing provider credentials, malformed reports, or optional dependency gaps.
+- Keep generated outputs under `artifacts/`; do not commit raw local evals, raw dashboards, or raw dataset exports.
+- Commit curated examples and docs only when they are intentionally part of the repo.
+
+## Issue, Branch, PR Workflow
+
+- Always work from `main` on a short-lived branch. Do not implement directly on `main`.
+- Prefer branch names like `<issue-number>-short-description`, for example `32-html-report-dashboard`.
+- Every substantial task should have a GitHub issue first. If the user asks to implement an untracked task, offer or create an issue before coding when appropriate.
+- PRs should link the issue using `Closes #N` in the PR body and, when appropriate, the commit message.
+- PR bodies should include a concise summary and a test plan. Keep them practical and reviewer-friendly.
+- After a PR is merged, return to `main`, pull latest, and delete/let GitHub delete the feature branch.
+- Do not push or merge destructive Git operations unless the user explicitly asks.
+
+## GitHub Issue Style
+
+- Issues should include a clear goal, acceptance criteria, and relevant labels.
+- For implementation issues, acceptance criteria should mention tests and docs when user-facing behavior changes.
+- Use labels consistently: `attack-module`, `model-provider`, `scoring`, `ci`, `dataset`, `dashboard`, `research`, `documentation`, `infrastructure`, and `v1` when relevant.
+- Keep launch/research tasks separate from code tasks unless the implementation is directly required.
+
+## Release And Research Artifacts
+
+- `main` is the release-quality branch. Keep it green and understandable.
+- Local model runs are useful for analysis but should remain ignored under `artifacts/`.
+- Dataset publication should use curated JSONL/Parquet exports, a dataset card, schema docs, and safety/license notes.
+- Research paper work should stay venue-neutral unless the user chooses a target venue.
