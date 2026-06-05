@@ -62,10 +62,18 @@ def main(argv: list[str] | None = None) -> int:
     models = parse_model_list(args.models) if args.models else list(DEFAULT_MODELS)
     run_id = args.run_id or f"local-ollama-sweep-{datetime.now(UTC).date()}"
     output_root = args.output_root or Path("artifacts/local-ollama-sweep") / run_id
-    reports_root = output_root / "reports"
-    dataset_path = output_root / "datasets" / "local-ollama-sweep.jsonl"
-    manifest_path = output_root / "manifest.json"
 
+    if args.refresh_only:
+        write_artifacts(
+            models=models,
+            run_id=run_id,
+            output_root=output_root,
+            sweep_results=scan_existing_results(models, output_root / "reports"),
+            started_at=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        )
+        return 0
+
+    reports_root = output_root / "reports"
     started_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
     sweep_results: list[SweepResult] = []
 
@@ -75,12 +83,14 @@ def main(argv: list[str] | None = None) -> int:
         try:
             reports = run_evaluation([model], model_output_dir)
         except Exception as exc:  # noqa: BLE001 - manifest should capture failures.
+            partial_report_count = len(tuple(model_output_dir.glob("*.json")))
+            status = "partial_failed" if partial_report_count else "failed"
             sweep_results.append(
                 SweepResult(
                     model=model,
-                    status="failed",
+                    status=status,
                     output_dir=str(model_output_dir),
-                    report_count=0,
+                    report_count=partial_report_count,
                     error=str(exc),
                 )
             )
@@ -96,20 +106,72 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
 
+    manifest = write_artifacts(
+        models=models,
+        run_id=run_id,
+        output_root=output_root,
+        sweep_results=sweep_results,
+        started_at=started_at,
+    )
+
+    return 0 if manifest["completed_count"] else 1
+
+
+def scan_existing_results(models: list[str], reports_root: Path) -> list[SweepResult]:
+    """Build manifest entries from report files already on disk."""
+    results: list[SweepResult] = []
+    for model in models:
+        model_output_dir = reports_root / safe_filename(model)
+        report_count = len(tuple(model_output_dir.glob("*.json"))) if model_output_dir.exists() else 0
+        if report_count == 6:
+            status = "completed"
+        elif report_count > 0:
+            status = "partial_failed"
+        else:
+            status = "missing"
+        results.append(
+            SweepResult(
+                model=model,
+                status=status,
+                output_dir=str(model_output_dir),
+                report_count=report_count,
+            )
+        )
+    return results
+
+
+def write_artifacts(
+    *,
+    models: list[str],
+    run_id: str,
+    output_root: Path,
+    sweep_results: list[SweepResult],
+    started_at: str,
+) -> dict[str, object]:
+    """Write dataset export and manifest for sweep results."""
+    reports_root = output_root / "reports"
+    dataset_path = output_root / "datasets" / "local-ollama-sweep.jsonl"
+    manifest_path = output_root / "manifest.json"
+
     dataset_rows = []
-    if any(result.status == "completed" for result in sweep_results):
+    if any(result.report_count for result in sweep_results):
         report_paths = discover_report_paths(reports_root)
         dataset_rows = reports_to_rows(report_paths, run_id=run_id)
         write_jsonl(dataset_rows, dataset_path)
 
     finished_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
-    manifest = {
+    manifest: dict[str, object] = {
         "run_id": run_id,
         "started_at": started_at,
         "finished_at": finished_at,
         "model_count": len(models),
         "completed_count": sum(1 for result in sweep_results if result.status == "completed"),
-        "failed_count": sum(1 for result in sweep_results if result.status == "failed"),
+        "partial_failed_count": sum(
+            1 for result in sweep_results if result.status == "partial_failed"
+        ),
+        "failed_count": sum(
+            1 for result in sweep_results if result.status in {"failed", "missing"}
+        ),
         "row_count": len(dataset_rows),
         "output_root": str(output_root),
         "reports_root": str(reports_root),
@@ -123,8 +185,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"Wrote manifest: {manifest_path}", flush=True)
     print(f"Wrote dataset rows: {len(dataset_rows)}", flush=True)
-
-    return 0 if manifest["completed_count"] else 1
+    return manifest
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -144,6 +205,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-id",
         help="Run identifier used in the dataset export and default output path.",
+    )
+    parser.add_argument(
+        "--refresh-only",
+        action="store_true",
+        help="Regenerate manifest and JSONL from existing report directories.",
     )
     return parser
 

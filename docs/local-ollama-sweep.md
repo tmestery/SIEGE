@@ -66,3 +66,27 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_local_ollama_sweep.py \
 
 The script continues across individual model failures and records them in
 `manifest.json`.
+
+For large local models, increase the Ollama request timeout:
+
+```sh
+export OLLAMA_TIMEOUT_SECONDS=600
+```
+
+Retry failed models only:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_local_ollama_sweep.py \
+  --models "ollama/gemma4:31b,ollama/devstral-small-2:latest,ollama/deepseek-r1:8b" \
+  --run-id local-ollama-sweep-2026-06-04 \
+  --output-root artifacts/local-ollama-sweep/2026-06-04
+```
+
+Refresh manifest and JSONL after partial runs:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_local_ollama_sweep.py \
+  --refresh-only \
+  --run-id local-ollama-sweep-2026-06-04 \
+  --output-root artifacts/local-ollama-sweep/2026-06-04
+```
