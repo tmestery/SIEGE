@@ -8,20 +8,21 @@ committed.
 
 ## Model Set
 
-Target a practical local set under 70B parameters:
+Target a practical local set that completed on the local machine:
 
 - `ollama/gemma3:4b-it-qat`
 - `ollama/gemma3:12b`
-- `ollama/gemma4:31b`
 - `ollama/codellama:13b`
-- `ollama/devstral-small-2:latest`
 - `ollama/llama3.2:3b`
 - `ollama/llama3.1:8b`
 - `ollama/mistral:7b`
 - `ollama/qwen2.5:7b`
 - `ollama/qwen2.5:14b`
 - `ollama/phi4:14b`
-- `ollama/deepseek-r1:8b`
+
+The initial candidate set also included `ollama/gemma4:31b`,
+`ollama/devstral-small-2:latest`, and `ollama/deepseek-r1:8b`, but those runs
+were partial on this machine and are excluded from the canonical sweep.
 
 ## Output Layout
 
@@ -45,7 +46,6 @@ ollama pull mistral:7b
 ollama pull qwen2.5:7b
 ollama pull qwen2.5:14b
 ollama pull phi4:14b
-ollama pull deepseek-r1:8b
 ```
 
 To resume or rerun a single model manually:
@@ -67,17 +67,17 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_local_ollama_sweep.py \
 The script continues across individual model failures and records them in
 `manifest.json`.
 
-For large local models, increase the Ollama request timeout:
+For larger local models, increase the Ollama request timeout:
 
 ```sh
 export OLLAMA_TIMEOUT_SECONDS=600
 ```
 
-Retry failed models only:
+Run a custom model subset:
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_local_ollama_sweep.py \
-  --models "ollama/gemma4:31b,ollama/devstral-small-2:latest,ollama/deepseek-r1:8b" \
+  --models "ollama/gemma3:12b,ollama/qwen2.5:14b" \
   --run-id local-ollama-sweep-2026-06-04 \
   --output-root artifacts/local-ollama-sweep/2026-06-04
 ```

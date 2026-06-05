@@ -20,16 +20,13 @@ from siege.dataset_export import discover_report_paths, reports_to_rows, write_j
 DEFAULT_MODELS: tuple[str, ...] = (
     "ollama/gemma3:4b-it-qat",
     "ollama/gemma3:12b",
-    "ollama/gemma4:31b",
     "ollama/codellama:13b",
-    "ollama/devstral-small-2:latest",
     "ollama/llama3.2:3b",
     "ollama/llama3.1:8b",
     "ollama/mistral:7b",
     "ollama/qwen2.5:7b",
     "ollama/qwen2.5:14b",
     "ollama/phi4:14b",
-    "ollama/deepseek-r1:8b",
 )
 
 
