@@ -1,33 +1,83 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  buildRiskHeatmap,
   filterRows,
   flattenResults,
+  formatPercent,
   formatScore,
   getFilterOptions,
+  normalizeDataset,
   parseReportFiles,
   scoreClass,
+  summarizeByCategory,
+  summarizeByModel,
   summarizeReports,
+  summarizeRows,
 } from "./reportUtils.js";
+
+const bundledDatasets = [
+  {
+    id: "local-ollama-sweep-2026-06-04",
+    title: "Local Ollama Sweep 2026-06-04",
+    path: "/datasets/local-ollama-sweep-2026-06-04.json",
+  },
+];
 
 const initialFilters = {
   model: "",
+  attack: "",
   category: "",
   status: "all",
 };
 
 export default function App() {
   const [reports, setReports] = useState([]);
+  const [dataset, setDataset] = useState(null);
   const [filters, setFilters] = useState(initialFilters);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const rows = useMemo(() => flattenResults(reports), [reports]);
   const summary = useMemo(() => summarizeReports(reports), [reports]);
+  const rowSummary = useMemo(() => summarizeRows(rows), [rows]);
   const options = useMemo(() => getFilterOptions(rows), [rows]);
   const filteredRows = useMemo(
     () => filterRows(rows, filters),
     [rows, filters],
   );
+  const modelRisk = useMemo(
+    () => summarizeByModel(filteredRows),
+    [filteredRows],
+  );
+  const categoryRisk = useMemo(
+    () => summarizeByCategory(filteredRows),
+    [filteredRows],
+  );
+  const heatmap = useMemo(() => buildRiskHeatmap(filteredRows), [filteredRows]);
+
+  useEffect(() => {
+    loadBundledDataset(bundledDatasets[0]);
+  }, []);
+
+  async function loadBundledDataset(datasetConfig) {
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch(datasetConfig.path);
+      if (!response.ok) {
+        throw new Error(`Unable to load ${datasetConfig.title}`);
+      }
+      const payload = await response.json();
+      const normalizedDataset = normalizeDataset(payload, datasetConfig.path);
+      setDataset(normalizedDataset);
+      setReports(normalizedDataset.reports);
+      setFilters(initialFilters);
+    } catch (loadError) {
+      setError(loadError.message || "Unable to load bundled dataset.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   async function handleFiles(event) {
     const files = event.target.files;
@@ -43,6 +93,7 @@ export default function App() {
         throw new Error("No report JSON files were loaded.");
       }
       setReports(parsedReports);
+      setDataset(null);
       setFilters(initialFilters);
     } catch (loadError) {
       setError(loadError.message || "Unable to load report files.");
@@ -60,11 +111,11 @@ export default function App() {
       <section className="hero">
         <div>
           <p className="eyebrow">SEIGE Dashboard</p>
-          <h1>React report dashboard for LLM security evaluations</h1>
+          <h1>React dataset dashboard for LLM security evaluations</h1>
           <p className="hero-copy">
-            Load one or more SEIGE JSON reports to review aggregate risk,
-            category scores, and attack-level evidence before sharing,
-            publishing, or converting runs into datasets.
+            Explore curated SEIGE datasets with risk graphs, model/category
+            heatmaps, filters, and attack-level evidence. Upload report JSON
+            files when you want to compare a fresh local run.
           </p>
         </div>
         <label className="upload-card">
@@ -81,11 +132,22 @@ export default function App() {
 
       {error ? <div className="error-banner">{error}</div> : null}
 
-      <SummaryCards summary={summary} />
+      <DatasetSelector
+        activeDataset={dataset}
+        datasets={bundledDatasets}
+        isLoading={isLoading}
+        onLoad={loadBundledDataset}
+      />
+
+      <SummaryCards summary={summary} rowSummary={rowSummary} />
 
       {reports.length > 0 ? (
         <>
-          <ReportOverview reports={reports} />
+          <VisualInsights
+            categoryRisk={categoryRisk}
+            heatmap={heatmap}
+            modelRisk={modelRisk}
+          />
           <Filters
             filters={filters}
             options={options}
@@ -93,6 +155,7 @@ export default function App() {
             shown={filteredRows.length}
             total={rows.length}
           />
+          <ReportOverview reports={reports} />
           <ResultsTable rows={filteredRows} />
         </>
       ) : (
@@ -102,7 +165,34 @@ export default function App() {
   );
 }
 
-function SummaryCards({ summary }) {
+function DatasetSelector({ activeDataset, datasets, isLoading, onLoad }) {
+  return (
+    <section className="panel dataset-panel">
+      <div>
+        <p className="eyebrow">Bundled dataset</p>
+        <h2>{activeDataset?.title || "No bundled dataset loaded"}</h2>
+        <p className="muted">
+          {activeDataset?.description ||
+            "Load the committed local Ollama sweep dataset or upload reports."}
+        </p>
+      </div>
+      <div className="dataset-actions">
+        {datasets.map((dataset) => (
+          <button
+            disabled={isLoading}
+            key={dataset.id}
+            onClick={() => onLoad(dataset)}
+            type="button"
+          >
+            {isLoading ? "Loading..." : `Load ${dataset.title}`}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SummaryCards({ summary, rowSummary }) {
   return (
     <section className="metric-grid" aria-label="Evaluation summary">
       <MetricCard label="Reports" value={summary.reportCount} />
@@ -116,11 +206,139 @@ function SummaryCards({ summary }) {
       />
       <MetricCard label="Avg Risk" value={formatScore(summary.averageRiskScore)} />
       <MetricCard
+        label="Failure Rate"
+        value={formatPercent(rowSummary.failureRate)}
+        tone={rowSummary.failureRate >= 0.5 ? "bad" : "neutral"}
+      />
+      <MetricCard
         label="Highest Risk"
         value={formatScore(summary.highestRiskScore)}
         tone={summary.highestRiskScore >= 7.5 ? "bad" : "neutral"}
       />
     </section>
+  );
+}
+
+function VisualInsights({ categoryRisk, heatmap, modelRisk }) {
+  return (
+    <section className="visual-grid" aria-label="Dataset visualizations">
+      <BarChart
+        title="Model risk ranking"
+        eyebrow="Graph"
+        rows={modelRisk.slice(0, 9)}
+        valueKey="averageWeightedRiskScore"
+        valueLabel={(row) => formatScore(row.averageWeightedRiskScore)}
+        detailLabel={(row) =>
+          `${row.failed}/${row.count} failed (${formatPercent(row.failureRate)})`
+        }
+      />
+      <BarChart
+        title="Category risk"
+        eyebrow="Graph"
+        rows={categoryRisk}
+        valueKey="averageWeightedRiskScore"
+        valueLabel={(row) => formatScore(row.averageWeightedRiskScore)}
+        detailLabel={(row) =>
+          `${row.failed}/${row.count} failed (${formatPercent(row.failureRate)})`
+        }
+      />
+      <RiskHeatmap heatmap={heatmap} />
+    </section>
+  );
+}
+
+function BarChart({ detailLabel, eyebrow, rows, title, valueKey, valueLabel }) {
+  const maxValue = Math.max(10, ...rows.map((row) => Number(row[valueKey] || 0)));
+
+  return (
+    <section className="panel chart-panel">
+      <div className="panel-heading">
+        <div>
+          <p className="eyebrow">{eyebrow}</p>
+          <h2>{title}</h2>
+        </div>
+      </div>
+      <div className="bar-list">
+        {rows.map((row) => {
+          const value = Number(row[valueKey] || 0);
+          return (
+            <div className="bar-row" key={row.label}>
+              <div className="bar-label">
+                <strong>{row.label}</strong>
+                <span>{detailLabel(row)}</span>
+              </div>
+              <div className="bar-track" aria-hidden="true">
+                <div
+                  className={`bar-fill ${scoreClass(value)}`}
+                  style={{ width: `${Math.max((value / maxValue) * 100, 2)}%` }}
+                />
+              </div>
+              <span className={`score-pill ${scoreClass(value)}`}>
+                {valueLabel(row)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function RiskHeatmap({ heatmap }) {
+  return (
+    <section className="panel heatmap-panel">
+      <div className="panel-heading">
+        <div>
+          <p className="eyebrow">Heatmap</p>
+          <h2>Average weighted risk by model and category</h2>
+        </div>
+      </div>
+      <div className="heatmap-wrap">
+        <div
+          className="heatmap-grid"
+          style={{
+            gridTemplateColumns: `minmax(190px, 1.2fr) repeat(${heatmap.categories.length}, minmax(118px, 1fr))`,
+          }}
+        >
+          <div className="heatmap-corner">Model</div>
+          {heatmap.categories.map((category) => (
+            <div className="heatmap-header" key={category}>
+              {category}
+            </div>
+          ))}
+          {heatmap.models.map((model) => (
+            <HeatmapRow heatmap={heatmap} key={model} model={model} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HeatmapRow({ heatmap, model }) {
+  return (
+    <>
+      <div className="heatmap-model">{model}</div>
+      {heatmap.categories.map((category) => {
+        const cell = heatmap.cells.find(
+          (candidate) =>
+            candidate.model === model && candidate.category === category,
+        );
+        const score = Number(cell?.averageWeightedRiskScore || 0);
+        return (
+          <div
+            className={`heatmap-cell ${scoreClass(score)}`}
+            key={`${model}:${category}`}
+            title={`${model} / ${category}: ${formatScore(score)} risk`}
+          >
+            <strong>{formatScore(score)}</strong>
+            <span>
+              {cell?.failed || 0}/{cell?.count || 0} failed
+            </span>
+          </div>
+        );
+      })}
+    </>
   );
 }
 
@@ -205,6 +423,20 @@ function Filters({ filters, options, onChange, shown, total }) {
           {options.models.map((model) => (
             <option key={model} value={model}>
               {model}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Attack
+        <select
+          value={filters.attack}
+          onChange={(event) => onChange("attack", event.target.value)}
+        >
+          <option value="">All attacks</option>
+          {options.attacks.map((attack) => (
+            <option key={attack} value={attack}>
+              {attack}
             </option>
           ))}
         </select>
