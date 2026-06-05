@@ -30,12 +30,18 @@ const initialFilters = {
   status: "all",
 };
 
+const VIEW_MODES = {
+  DATASET: "dataset",
+  CUSTOM: "custom",
+};
+
 export default function App() {
   const [reports, setReports] = useState([]);
   const [dataset, setDataset] = useState(null);
   const [filters, setFilters] = useState(initialFilters);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState(VIEW_MODES.DATASET);
 
   const rows = useMemo(() => flattenResults(reports), [reports]);
   const summary = useMemo(() => summarizeReports(reports), [reports]);
@@ -72,6 +78,7 @@ export default function App() {
       setDataset(normalizedDataset);
       setReports(normalizedDataset.reports);
       setFilters(initialFilters);
+      setViewMode(VIEW_MODES.DATASET);
     } catch (loadError) {
       setError(loadError.message || "Unable to load bundled dataset.");
     } finally {
@@ -95,6 +102,7 @@ export default function App() {
       setReports(parsedReports);
       setDataset(null);
       setFilters(initialFilters);
+      setViewMode(VIEW_MODES.CUSTOM);
     } catch (loadError) {
       setError(loadError.message || "Unable to load report files.");
     } finally {
@@ -106,6 +114,22 @@ export default function App() {
     setFilters((current) => ({ ...current, [name]: value }));
   }
 
+  function showDatasetView() {
+    if (dataset) {
+      setViewMode(VIEW_MODES.DATASET);
+      return;
+    }
+    loadBundledDataset(bundledDatasets[0]);
+  }
+
+  function showCustomView() {
+    setViewMode(VIEW_MODES.CUSTOM);
+    setReports([]);
+    setDataset(null);
+    setFilters(initialFilters);
+    setError("");
+  }
+
   return (
     <main className="app-shell">
       <section className="hero">
@@ -113,31 +137,30 @@ export default function App() {
           <p className="eyebrow">SEIGE Dashboard</p>
           <h1>React dataset dashboard for LLM security evaluations</h1>
           <p className="hero-copy">
-            Explore curated SEIGE datasets with risk graphs, model/category
-            heatmaps, filters, and attack-level evidence. Upload report JSON
-            files when you want to compare a fresh local run.
+            Explore the published SEIGE attack evaluation dataset with risk
+            graphs, model/category heatmaps, filters, and attack-level
+            evidence.
           </p>
         </div>
-        <label className="upload-card">
-          <span>Load report JSON</span>
-          <strong>{isLoading ? "Loading..." : "Choose files"}</strong>
-          <input
-            type="file"
-            accept="application/json,.json"
-            multiple
-            onChange={handleFiles}
-          />
-        </label>
+        <ViewSwitcher
+          activeMode={viewMode}
+          onCustom={showCustomView}
+          onDataset={showDatasetView}
+        />
       </section>
 
       {error ? <div className="error-banner">{error}</div> : null}
 
-      <DatasetSelector
-        activeDataset={dataset}
-        datasets={bundledDatasets}
-        isLoading={isLoading}
-        onLoad={loadBundledDataset}
-      />
+      {viewMode === VIEW_MODES.DATASET ? (
+        <DatasetSelector
+          activeDataset={dataset}
+          datasets={bundledDatasets}
+          isLoading={isLoading}
+          onLoad={loadBundledDataset}
+        />
+      ) : (
+        <CustomReportLoader isLoading={isLoading} onFiles={handleFiles} />
+      )}
 
       <SummaryCards summary={summary} rowSummary={rowSummary} />
 
@@ -188,6 +211,52 @@ function DatasetSelector({ activeDataset, datasets, isLoading, onLoad }) {
           </button>
         ))}
       </div>
+    </section>
+  );
+}
+
+function ViewSwitcher({ activeMode, onCustom, onDataset }) {
+  return (
+    <nav className="view-switcher" aria-label="Dashboard mode">
+      <button
+        className={activeMode === VIEW_MODES.DATASET ? "active" : ""}
+        onClick={onDataset}
+        type="button"
+      >
+        Published dataset
+      </button>
+      <button
+        className={activeMode === VIEW_MODES.CUSTOM ? "active" : ""}
+        onClick={onCustom}
+        type="button"
+      >
+        Custom reports
+      </button>
+    </nav>
+  );
+}
+
+function CustomReportLoader({ isLoading, onFiles }) {
+  return (
+    <section className="panel custom-report-panel">
+      <div>
+        <p className="eyebrow">Custom reports</p>
+        <h2>Load your own SEIGE report JSON</h2>
+        <p className="muted">
+          Use this mode for local review, demos, or comparing a fresh run. The
+          published dataset view is the default public dashboard.
+        </p>
+      </div>
+      <label className="upload-card compact">
+        <span>Load report JSON</span>
+        <strong>{isLoading ? "Loading..." : "Choose files"}</strong>
+        <input
+          type="file"
+          accept="application/json,.json"
+          multiple
+          onChange={onFiles}
+        />
+      </label>
     </section>
   );
 }
@@ -297,13 +366,13 @@ function RiskHeatmap({ heatmap }) {
         <div
           className="heatmap-grid"
           style={{
-            gridTemplateColumns: `minmax(190px, 1.2fr) repeat(${heatmap.categories.length}, minmax(118px, 1fr))`,
+            gridTemplateColumns: `minmax(230px, 1.3fr) repeat(${heatmap.categories.length}, minmax(150px, 1fr))`,
           }}
         >
           <div className="heatmap-corner">Model</div>
           {heatmap.categories.map((category) => (
-            <div className="heatmap-header" key={category}>
-              {category}
+            <div className="heatmap-header" key={category} title={category}>
+              {displayLabel(category)}
             </div>
           ))}
           {heatmap.models.map((model) => (
@@ -318,7 +387,9 @@ function RiskHeatmap({ heatmap }) {
 function HeatmapRow({ heatmap, model }) {
   return (
     <>
-      <div className="heatmap-model">{model}</div>
+      <div className="heatmap-model" title={model}>
+        {displayLabel(model)}
+      </div>
       {heatmap.categories.map((category) => {
         const cell = heatmap.cells.find(
           (candidate) =>
@@ -552,9 +623,13 @@ function EmptyState() {
     <section className="empty-state">
       <h2>No reports loaded yet</h2>
       <p>
-        Select SEIGE report JSON files from `examples/`, `artifacts/nightly-eval`,
-        or a local Ollama run directory. `index.json` files are ignored.
+        Select the published dataset view or load SEIGE report JSON files in
+        custom report mode. `index.json` files are ignored.
       </p>
     </section>
   );
+}
+
+function displayLabel(value) {
+  return String(value || "unknown").replaceAll("_", " ");
 }
