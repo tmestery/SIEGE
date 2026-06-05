@@ -212,6 +212,8 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m siege.dataset_export \
 
 Keep raw `artifacts/` runs local and publish curated dataset exports to
 HuggingFace Datasets instead of committing generated evaluation data to GitHub.
+The current curated SEIGE attack evaluation dataset is published at
+[`tmesttttttttt/seige-attack-evals`](https://huggingface.co/datasets/tmesttttttttt/seige-attack-evals).
 
 ## Local Ollama Sweep
 
