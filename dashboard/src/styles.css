@@ -28,6 +28,21 @@ select {
   font: inherit;
 }
 
+button {
+  border: 1px solid rgba(124, 199, 255, 0.35);
+  border-radius: 12px;
+  background: rgba(124, 199, 255, 0.14);
+  color: #dff2ff;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 10px 14px;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .app-shell {
   width: min(1440px, calc(100% - 32px));
   margin: 0 auto;
@@ -77,6 +92,27 @@ select {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
 }
 
+.dataset-panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+}
+
+.dataset-panel h2 {
+  margin: 0;
+  color: #f7fbff;
+  font-size: 1.45rem;
+  letter-spacing: -0.04em;
+}
+
+.dataset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .upload-card {
   display: flex;
   flex-direction: column;
@@ -115,7 +151,7 @@ select {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -159,6 +195,124 @@ select {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+}
+
+.visual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.heatmap-panel {
+  grid-column: 1 / -1;
+}
+
+.bar-list {
+  display: grid;
+  gap: 12px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.1fr) minmax(180px, 2fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.bar-label {
+  display: grid;
+  min-width: 0;
+}
+
+.bar-label strong {
+  overflow: hidden;
+  color: #f7fbff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-label span {
+  color: #91a6ca;
+  font-size: 0.82rem;
+}
+
+.bar-track {
+  min-height: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(8, 17, 31, 0.72);
+}
+
+.bar-fill {
+  min-height: 14px;
+  border-radius: inherit;
+}
+
+.bar-fill.risk-none {
+  background: linear-gradient(90deg, #3fbf84, #78e6b0);
+}
+
+.bar-fill.risk-low {
+  background: linear-gradient(90deg, #2f88d8, #7cc7ff);
+}
+
+.bar-fill.risk-medium {
+  background: linear-gradient(90deg, #c8842d, #ffd18c);
+}
+
+.bar-fill.risk-high {
+  background: linear-gradient(90deg, #d84063, #ff8fa3);
+}
+
+.heatmap-wrap {
+  overflow-x: auto;
+}
+
+.heatmap-grid {
+  display: grid;
+  min-width: 920px;
+  gap: 6px;
+}
+
+.heatmap-corner,
+.heatmap-header,
+.heatmap-model,
+.heatmap-cell {
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.heatmap-corner,
+.heatmap-header {
+  background: rgba(124, 199, 255, 0.12);
+  color: #9fcfff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.heatmap-model {
+  background: rgba(8, 17, 31, 0.72);
+  color: #f7fbff;
+  font-weight: 800;
+}
+
+.heatmap-cell {
+  display: grid;
+  gap: 3px;
+  min-height: 64px;
+}
+
+.heatmap-cell strong {
+  color: currentColor;
+  font-size: 1rem;
+}
+
+.heatmap-cell span {
+  color: currentColor;
+  font-size: 0.76rem;
+  opacity: 0.78;
 }
 
 .panel h2,
@@ -235,7 +389,7 @@ dd {
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr)) minmax(180px, auto);
+  grid-template-columns: repeat(4, minmax(160px, 1fr)) minmax(180px, auto);
   gap: 14px;
   align-items: end;
   margin-bottom: 24px;
@@ -345,12 +499,29 @@ pre {
 
 @media (max-width: 1100px) {
   .hero,
+  .dataset-panel,
   .filters {
     grid-template-columns: 1fr;
   }
 
   .metric-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dataset-panel {
+    align-items: stretch;
+  }
+
+  .dataset-actions {
+    justify-content: flex-start;
+  }
+
+  .visual-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bar-row {
+    grid-template-columns: 1fr;
   }
 }
 

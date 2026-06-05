@@ -102,8 +102,10 @@ labels.
 
 ## React Dashboard
 
-The React dashboard loads one or more SEIGE report JSON files in the browser and
-shows model summaries, category scores, filters, and attack-level evidence.
+The React dashboard loads the committed local Ollama sweep dataset by default
+and shows model summaries, category graphs, model/category heatmaps, filters,
+and attack-level evidence. You can still upload one or more SEIGE report JSON
+files in the browser for ad hoc local review.
 
 ```sh
 cd dashboard
@@ -111,9 +113,9 @@ npm install
 npm run dev
 ```
 
-Then open the local Vite URL and select report files from `examples/`,
-`artifacts/nightly-eval/`, or a local Ollama run directory. `index.json` files
-are ignored by the dashboard loader.
+Then open the local Vite URL. The bundled JSON dataset lives under
+`dashboard/public/datasets/`; uploaded `index.json` files are ignored by the
+manual report loader.
 
 Build and test the dashboard with:
 
