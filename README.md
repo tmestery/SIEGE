@@ -222,6 +222,21 @@ PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_local_ollama_sweep.py \
   --run-id local-ollama-sweep-YYYY-MM-DD
 ```
 
+## HuggingFace Dataset
+
+Prepare a curated HuggingFace package from a completed local sweep:
+
+```sh
+pip install pyarrow
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/prepare_huggingface_dataset.py \
+  --manifest artifacts/local-ollama-sweep/2026-06-04/manifest.json \
+  --run-id local-ollama-sweep-2026-06-04 \
+  --repo-id tmestery/seige-attack-evals
+```
+
+See [`docs/huggingface-dataset.md`](docs/huggingface-dataset.md) for upload and
+loading instructions.
+
 ## Citation
 
 If you use SEIGE in your research, please cite:

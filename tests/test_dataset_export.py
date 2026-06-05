@@ -174,8 +174,8 @@ class DatasetExportTests(unittest.TestCase):
             output_path = Path(directory) / "dataset.parquet"
             write_parquet(rows, output_path)
 
-        self.assertTrue(output_path.exists())
-        self.assertGreater(output_path.stat().st_size, 0)
+            self.assertTrue(output_path.exists())
+            self.assertGreater(output_path.stat().st_size, 0)
 
 
 if __name__ == "__main__":
