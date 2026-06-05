@@ -1,0 +1,28 @@
+{
+  "name": "seige-dashboard",
+  "version": "1.0.0",
+  "description": "React dashboard for SEIGE evaluation reports",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test"
+  },
+  "keywords": [
+    "seige",
+    "llm-security",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "type": "module",
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.2",
+    "vite": "^8.0.16"
+  }
+}
