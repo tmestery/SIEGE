@@ -170,8 +170,10 @@ class OllamaClient(ModelClient):
             method="POST",
         )
 
+        timeout_seconds = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "120"))
+
         try:
-            with urllib.request.urlopen(request, timeout=120) as response:
+            with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
                 body = json.loads(response.read().decode("utf-8"))
         except urllib.error.URLError as exc:
             raise ConnectionError(f"Could not reach Ollama at {self.base_url}.") from exc

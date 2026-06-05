@@ -211,6 +211,17 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m siege.dataset_export \
 Keep raw `artifacts/` runs local and publish curated dataset exports to
 HuggingFace Datasets instead of committing generated evaluation data to GitHub.
 
+## Local Ollama Sweep
+
+To collect a broad local model dataset under `artifacts/`, see
+[`docs/local-ollama-sweep.md`](docs/local-ollama-sweep.md) and run:
+
+```sh
+export OLLAMA_TIMEOUT_SECONDS=600
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_local_ollama_sweep.py \
+  --run-id local-ollama-sweep-YYYY-MM-DD
+```
+
 ## Citation
 
 If you use SEIGE in your research, please cite:
