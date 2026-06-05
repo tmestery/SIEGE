@@ -20,6 +20,8 @@ env/
 build/
 dist/
 *.egg-info/
+dashboard/dist/
+dashboard/node_modules/
 
 # Test and coverage artifacts
 .coverage

@@ -100,6 +100,29 @@ prompt-injection, jailbreaking, adversarial suffix, system prompt extraction,
 multi-turn manipulation, and data exfiltration runs across multiple model
 labels.
 
+## React Dashboard
+
+The React dashboard loads one or more SEIGE report JSON files in the browser and
+shows model summaries, category scores, filters, and attack-level evidence.
+
+```sh
+cd dashboard
+npm install
+npm run dev
+```
+
+Then open the local Vite URL and select report files from `examples/`,
+`artifacts/nightly-eval/`, or a local Ollama run directory. `index.json` files
+are ignored by the dashboard loader.
+
+Build and test the dashboard with:
+
+```sh
+cd dashboard
+npm run test
+npm run build
+```
+
 ## Scoring
 
 SEIGE scores risk on a deterministic 0-10 scale. Higher scores indicate higher
